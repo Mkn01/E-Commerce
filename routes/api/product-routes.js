@@ -4,51 +4,108 @@ const { Product, Category, Tag, ProductTag } = require("../../models");
 // The `/api/products` endpoint
 
 // get all products
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   // find all products
-  // be sure to include its associated Category and Tag data
+  try {
+    const allProducts = await Product.findAll({
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+        { model: Tag, as: "tags", through: ProductTag },
+      ],
+    });
+    if (!allProducts) {
+      return res.status(404).json({
+        error: "No product found",
+      });
+    }
+    return res.status(200).json(allProducts);
+  } catch (error) {
+    res.status(500).json({
+      error:
+        "Sorry we can not provide all product information at this time. Please try again later",
+    });
+  }
 });
 
 // get one product
-router.get("/:id", (req, res) => {
+router.get("/:id", async (req, res) => {
   // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
+  try {
+    const product = await Product.findByPk(req.params.id, {
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+        { model: Tag, as: "tags" },
+      ],
+    });
+    if (!product) {
+      return res.status(404).json({
+        error: "No product found",
+      });
+    }
+    return res.status(200).json(product);
+  } catch (error) {
+    return res.status(500).json({
+      error:
+        "Sorry we could not get this products information at this time, please try again later ",
+    });
+  }
 });
 
 // create new product
-router.post("/", (req, res) => {
-  /* req.body should look like this...
-    {
-      product_name: "Basketball",
-      price: 200.00,
-      stock: 3,
-      tagIds: [1, 2, 3, 4]
+router.post("/", async (req, res) => {
+  try {
+    const { product_name, price, stock, tagIds } = req.body;
+    if (!product_name || !price || !stock) {
+      return res.status(400).json({
+        error: "values undefined",
+        message:
+          "Please provide the product name, the price and the stock information.",
+      });
     }
-  */
-  Product.create(req.body)
-    .then((product) => {
-      // if there's product tags, we need to create pairings to bulk create in the ProductTag model
-      if (req.body.tagIds.length) {
+    newProduct = await Product.create({
+      product_name,
+      price,
+      stock,
+    });
+    if (tagIds && tagIds.length) {
+      try {
         const productTagIdArr = req.body.tagIds.map((tag_id) => {
           return {
-            product_id: product.id,
+            product_id: newProduct.id,
             tag_id,
           };
         });
-        return ProductTag.bulkCreate(productTagIdArr);
+        await ProductTag.bulkCreate(productTagIdArr);
+        return res.status(200).json({
+          message: "your Product has been successfully created",
+          product: newProduct,
+        });
+      } catch (error) {
+        return res.status(500).json({
+          error:
+            "Sorry we are unable to add product tags at this time, Please try again later. ",
+        });
       }
-      // if no product tags, just respond
-      res.status(200).json(product);
-    })
-    .then((productTagIds) => res.status(200).json(productTagIds))
-    .catch((err) => {
-      console.log(err);
-      res.status(400).json(err);
+    }
+    return res.status(200).json({
+      message: "Your new product has been created",
+      product: "newProduct",
     });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Sorry, we could not create your product at this time.",
+    });
+  }
 });
 
 // update product
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
   // update product data
   Product.update(req.body, {
     where: {
@@ -89,8 +146,28 @@ router.put("/:id", (req, res) => {
     });
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", async (req, res) => {
   // delete one product by its `id` value
+  try {
+    const deleteResult = await Product.destroy({
+      where: { id: req.params.id },
+    });
+
+    if (!deleteResult) {
+      return res.status(404).json({
+        error: "Product does not exist",
+      });
+    }
+
+    return res.status(200).json({
+      message: "The product has been deleted",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error:
+        "We were unable to delete the product at this time. Please try again later.",
+    });
+  }
 });
 
 module.exports = router;
