@@ -52,17 +52,18 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   // create a new category
   try {
-    const { newCategory } = req.body;
+    const { category_name } = req.body;
 
-    if (!newCategory) {
+    if (!category_name) {
       return res.status(400).json({
         error: "values undefined",
         message: "Please provide a new category name",
       });
     }
+    const newCategory = await Category.create(req.body);
     return res.status(200).json({
       message: "A new category has been created",
       category: newCategory,
@@ -77,10 +78,10 @@ router.post("/", (req, res) => {
 router.put("/:id", async (req, res) => {
   // update a category by its `id` value
   try {
-    const { newCategory } = req.body;
+    const { category_name } = req.body;
     const { id } = req.params;
 
-    if (!newCategory) {
+    if (!category_name) {
       return res.status(400).json({
         error: "Values undefined",
         message:
@@ -88,7 +89,7 @@ router.put("/:id", async (req, res) => {
       });
     }
     const updateResult = await Category.update(
-      { newCategory },
+      { category_name },
       {
         where: { id },
       }
