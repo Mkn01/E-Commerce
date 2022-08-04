@@ -50,4 +50,4 @@ View a Demo of the application [here](https://drive.google.com/file/d/1dUic5PZnr
 
 ## Developer Information
 
-Visit GitHub repository [here](https://github.com/Mkn01/E-Commerce/tree/dev)
+Visit GitHub repository [here](https://github.com/Mkn01)
