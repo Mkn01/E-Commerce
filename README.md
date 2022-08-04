@@ -36,10 +36,6 @@ npm run seed
 npm run start
 ```
 
-## Api routes
-
-A list of endpoints to test the application:
-
 ```
 npm run start
 ```
@@ -50,7 +46,7 @@ MIT License
 
 ## Video demo
 
-View a Demo of the application [here](https://drive.google.com/file/d/1AoM2bt5BxP89XPgT1wqZGW_MG9_qDTod/view)
+View a Demo of the application [here](https://drive.google.com/file/d/1dUic5PZnrfdoJ2wfD2Xltn4EPs5kpqLj/view)
 
 ## Developer Information
 
